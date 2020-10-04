@@ -1,6 +1,7 @@
 import {elementRoles} from 'aria-query'
 import {computeAccessibleName} from 'dom-accessibility-api'
 import {prettyDOM} from './pretty-dom'
+import {getConfig} from './config'
 
 const elementRoleList = buildElementRoleList(elementRoles)
 
@@ -154,14 +155,17 @@ function getRoles(container, {hidden = false} = {}) {
 
 function prettyRoles(dom, {hidden}) {
   const roles = getRoles(dom, {hidden})
-  //We prefer to skip generic role, we don't reccomand it
+  // We prefer to skip generic role, we don't recommend it
   return Object.entries(roles)
     .filter(([role]) => role !== 'generic')
     .map(([role, elements]) => {
       const delimiterBar = '-'.repeat(50)
       const elementsString = elements
         .map(el => {
-          const nameString = `Name "${computeAccessibleName(el)}":\n`
+          const nameString = `Name "${computeAccessibleName(el, {
+            computedStyleSupportsPseudoElements: getConfig()
+              .computedStyleSupportsPseudoElements,
+          })}":\n`
           const domString = prettyDOM(el.cloneNode(false))
           return `${nameString}${domString}`
         })
@@ -185,8 +189,41 @@ function computeAriaSelected(element) {
   if (element.tagName === 'OPTION') {
     return element.selected
   }
+
   // explicit value
-  const attributeValue = element.getAttribute('aria-selected')
+  return checkBooleanAttribute(element, 'aria-selected')
+}
+
+/**
+ * @param {Element} element -
+ * @returns {boolean | undefined} - false/true if (not)checked, undefined if not checked-able
+ */
+function computeAriaChecked(element) {
+  // implicit value from html-aam mappings: https://www.w3.org/TR/html-aam-1.0/#html-attribute-state-and-property-mappings
+  // https://www.w3.org/TR/html-aam-1.0/#details-id-56
+  // https://www.w3.org/TR/html-aam-1.0/#details-id-67
+  if ('indeterminate' in element && element.indeterminate) {
+    return undefined
+  }
+  if ('checked' in element) {
+    return element.checked
+  }
+
+  // explicit value
+  return checkBooleanAttribute(element, 'aria-checked')
+}
+
+/**
+ * @param {Element} element -
+ * @returns {boolean | undefined} - false/true if (not)pressed, undefined if not press-able
+ */
+function computeAriaPressed(element) {
+  // https://www.w3.org/TR/wai-aria-1.1/#aria-pressed
+  return checkBooleanAttribute(element, 'aria-pressed')
+}
+
+function checkBooleanAttribute(element, attribute) {
+  const attributeValue = element.getAttribute(attribute)
   if (attributeValue === 'true') {
     return true
   }
@@ -194,6 +231,30 @@ function computeAriaSelected(element) {
     return false
   }
   return undefined
+}
+
+/**
+ * @param {Element} element -
+ * @returns {number | undefined} - number if implicit heading or aria-level present, otherwise undefined
+ */
+function computeHeadingLevel(element) {
+  // https://w3c.github.io/html-aam/#el-h1-h6
+  // https://w3c.github.io/html-aam/#el-h1-h6
+  const implicitHeadingLevels = {
+    H1: 1,
+    H2: 2,
+    H3: 3,
+    H4: 4,
+    H5: 5,
+    H6: 6,
+  }
+  // explicit aria-level value
+  // https://www.w3.org/TR/wai-aria-1.2/#aria-level
+  const ariaLevelAttribute =
+    element.getAttribute('aria-level') &&
+    Number(element.getAttribute('aria-level'))
+
+  return ariaLevelAttribute || implicitHeadingLevels[element.tagName]
 }
 
 export {
@@ -204,4 +265,7 @@ export {
   prettyRoles,
   isInaccessible,
   computeAriaSelected,
+  computeAriaChecked,
+  computeAriaPressed,
+  computeHeadingLevel,
 }

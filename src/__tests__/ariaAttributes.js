@@ -1,4 +1,4 @@
-import {render} from './helpers/test-utils'
+import {render, renderIntoDocument} from './helpers/test-utils'
 
 test('`selected` throws on unsupported roles', () => {
   const {getByRole} = render(`<input aria-selected="true" type="text">`)
@@ -7,6 +7,68 @@ test('`selected` throws on unsupported roles', () => {
   ).toThrowErrorMatchingInlineSnapshot(
     `"\\"aria-selected\\" is not supported on role \\"textbox\\"."`,
   )
+})
+
+test('`pressed` throws on unsupported roles', () => {
+  const {getByRole} = render(`<input aria-pressed="true" type="text" />`)
+  expect(() =>
+    getByRole('textbox', {pressed: true}),
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"\\"aria-pressed\\" is not supported on role \\"textbox\\"."`,
+  )
+})
+
+test('`checked` throws on unsupported roles', () => {
+  const {getByRole} = render(`<input aria-checked="true" type="text">`)
+  expect(() =>
+    getByRole('textbox', {checked: true}),
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"\\"aria-checked\\" is not supported on role \\"textbox\\"."`,
+  )
+})
+
+test('`checked: true|false` matches `checked` checkboxes', () => {
+  const {getByRole} = renderIntoDocument(
+    `<div>
+      <input type="checkbox" checked />
+      <input type="checkbox" />
+    </div>`,
+  )
+  expect(getByRole('checkbox', {checked: true})).toBeInTheDocument()
+  expect(getByRole('checkbox', {checked: false})).toBeInTheDocument()
+})
+
+test('`checked: true|false` matches `checked` elements with proper role', () => {
+  const {getByRole} = renderIntoDocument(
+    `<div>
+      <span role="checkbox" aria-checked="true">✔</span>
+      <span role="checkbox" aria-checked="false">𝒙</span>
+    </div>`,
+  )
+  expect(getByRole('checkbox', {checked: true})).toBeInTheDocument()
+  expect(getByRole('checkbox', {checked: false})).toBeInTheDocument()
+})
+
+test('`checked: true|false` does not match element in `indeterminate` state', () => {
+  const {queryByRole, getByLabelText} = renderIntoDocument(
+    `<div>
+      <span role="checkbox" aria-checked="mixed">not so much</span>
+      <input type="checkbox" checked aria-label="indeteminate yes" />
+      <input type="checkbox" aria-label="indeteminate no" />
+    </div>`,
+  )
+  getByLabelText(/indeteminate yes/i).indeterminate = true
+  getByLabelText(/indeteminate no/i).indeterminate = true
+
+  expect(
+    queryByRole('checkbox', {checked: true, name: /indeteminate yes/i}),
+  ).toBeNull()
+  expect(
+    queryByRole('checkbox', {checked: false, name: /indeteminate no/i}),
+  ).toBeNull()
+  expect(
+    queryByRole('checkbox', {checked: true, name: /not so much/i}),
+  ).toBeNull()
 })
 
 test('`selected: true` matches `aria-selected="true"` on supported roles', () => {
@@ -82,4 +144,61 @@ test('`selected: true` matches `aria-selected="true"` on supported roles', () =>
   expect(getAllByRole('tab', {selected: true}).map(({id}) => id)).toEqual([
     'selected-tab',
   ])
+})
+
+test('`pressed: true|false` matches `pressed` buttons', () => {
+  const {getByRole} = renderIntoDocument(
+    `<div>
+      <button aria-pressed="true" />
+      <button aria-pressed="false" />
+    </div>`,
+  )
+  expect(getByRole('button', {pressed: true})).toBeInTheDocument()
+  expect(getByRole('button', {pressed: false})).toBeInTheDocument()
+})
+
+test('`pressed: true|false` matches `pressed` elements with proper role', () => {
+  const {getByRole} = renderIntoDocument(
+    `<div>
+      <span role="button" aria-pressed="true">✔</span>
+      <span role="button" aria-pressed="false">𝒙</span>
+    </div>`,
+  )
+  expect(getByRole('button', {pressed: true})).toBeInTheDocument()
+  expect(getByRole('button', {pressed: false})).toBeInTheDocument()
+})
+
+test('`level` matches elements with `heading` role', () => {
+  const {getAllByRole, queryByRole} = renderIntoDocument(
+    `<div>
+      <h1 id="heading-one">H1</h1>
+      <h2 id="first-heading-two">First H2</h2>
+      <h3 id="heading-three">H3</h3>
+      <div role="heading" aria-level="2" id="second-heading-two">Second H2</div>
+    </div>`,
+  )
+
+  expect(getAllByRole('heading', {level: 1}).map(({id}) => id)).toEqual([
+    'heading-one',
+  ])
+
+  expect(getAllByRole('heading', {level: 2}).map(({id}) => id)).toEqual([
+    'first-heading-two',
+    'second-heading-two',
+  ])
+
+  expect(getAllByRole('heading', {level: 3}).map(({id}) => id)).toEqual([
+    'heading-three',
+  ])
+
+  expect(queryByRole('heading', {level: 4})).not.toBeInTheDocument()
+})
+
+test('`level` throws on unsupported roles', () => {
+  const {getByRole} = render(`<button>Button</button>`)
+  expect(() =>
+    getByRole('button', {level: 3}),
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"Role \\"button\\" cannot have \\"level\\" property."`,
+  )
 })

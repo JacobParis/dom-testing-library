@@ -316,7 +316,8 @@
       "avatar_url": "https://avatars1.githubusercontent.com/u/186971?v=4",
       "profile": "https://neilkistner.com/",
       "contributions": [
-        "code"
+        "code",
+        "test"
       ]
     },
     {
@@ -1086,6 +1087,160 @@
       "contributions": [
         "code",
         "test"
+      ]
+    },
+    {
+      "login": "JacobParis",
+      "name": "Jacob Paris",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/5633704?v=4",
+      "profile": "https://www.jacobparis.com/",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "keiya01",
+      "name": "keiya sasaki",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/34934510?v=4",
+      "profile": "https://keiya01.github.io/portfolio",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "idanen",
+      "name": "Idan Entin",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1687893?v=4",
+      "profile": "https://github.com/idanen",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "DenrizSusam",
+      "name": "Deniz Susman",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/39295979?v=4",
+      "profile": "https://www.linkedin.com/in/deniz-susman-92b40a145/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "delca85",
+      "name": "Bianca Del Carretto",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/4076043?v=4",
+      "profile": "https://github.com/delca85",
+      "contributions": [
+        "test",
+        "code"
+      ]
+    },
+    {
+      "login": "ryuuji3",
+      "name": "Josh Lalonde",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/9097492?v=4",
+      "profile": "https://www.linkedin.com/in/joshlalonde3/",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "ipap360",
+      "name": "Ioannis Papadopoulos",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/11017666?v=4",
+      "profile": "https://github.com/ipap360",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "maxnewlands",
+      "name": "Maxwell Newlands",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/1304166?v=4",
+      "profile": "https://github.com/maxnewlands",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "jluxenberg",
+      "name": "Jared Luxenberg",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/450478?v=4",
+      "profile": "http://www.jaredlux.com",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "Snizhana",
+      "name": "snizhana",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/18139946?v=4",
+      "profile": "https://github.com/Snizhana",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "micha149",
+      "name": "Michael van Engelshoven",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/298880?v=4",
+      "profile": "https://github.com/micha149",
+      "contributions": [
+        "review"
+      ]
+    },
+    {
+      "login": "awesomeunleashed",
+      "name": "Asher Tuggle",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/10679635?v=4",
+      "profile": "https://ashertuggle.wixsite.com/portfolio",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "winterlamon",
+      "name": "Winter LaMon",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/16295605?v=4",
+      "profile": "https://github.com/winterlamon",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "victorandcode",
+      "name": "Victor Cordova",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/18427801?v=4",
+      "profile": "http://victorandcode.com",
+      "contributions": [
+        "code",
+        "test"
+      ]
+    },
+    {
+      "login": "slowselfip",
+      "name": "slowselfip",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/9762906?v=4",
+      "profile": "https://github.com/slowselfip",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
+      "login": "Semigradsky",
+      "name": "Dmitry Semigradsky",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/1198848?v=4",
+      "profile": "https://github.com/Semigradsky",
+      "contributions": [
+        "code"
       ]
     }
   ],

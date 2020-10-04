@@ -346,7 +346,9 @@ Here are the accessible roles:
 test('has no useful error message in findBy', async () => {
   const {findByRole} = render(`<li />`)
 
-  await expect(findByRole('option', {timeout: 1})).rejects.toThrow('Unable to find role="option"')
+  await expect(findByRole('option', {timeout: 1})).rejects.toThrow(
+    'Unable to find role="option"',
+  )
 })
 
 test('explicit role is most specific', () => {
@@ -378,6 +380,132 @@ Here are the accessible roles:
 `)
 })
 
+test('accessible regex name in error message for multiple found', () => {
+  const {getByRole} = render(
+    `<button>Increment value</button
+      ><button>Decrement value</button
+      ><button>Reset value</button
+    >`,
+  )
+
+  expect(() => getByRole('button', {name: /value/i}))
+    .toThrowErrorMatchingInlineSnapshot(`
+"Found multiple elements with the role "button" and name \`/value/i\`
+
+Here are the matching elements:
+
+<button>
+  Increment value
+</button>
+
+<button>
+  Decrement value
+</button>
+
+<button>
+  Reset value
+</button>
+
+(If this is intentional, then use the \`*AllBy*\` variant of the query (like \`queryAllByText\`, \`getAllByText\`, or \`findAllByText\`)).
+
+<div>
+  <button>
+    Increment value
+  </button>
+  <button>
+    Decrement value
+  </button>
+  <button>
+    Reset value
+  </button>
+</div>"
+`)
+})
+
+test('accessible string name in error message for multiple found', () => {
+  const {getByRole} = render(
+    `<button>Submit</button
+      ><button>Submit</button
+      ><button>Submit</button
+    >`,
+  )
+
+  expect(() => getByRole('button', {name: 'Submit'}))
+    .toThrowErrorMatchingInlineSnapshot(`
+"Found multiple elements with the role "button" and name "Submit"
+
+Here are the matching elements:
+
+<button>
+  Submit
+</button>
+
+<button>
+  Submit
+</button>
+
+<button>
+  Submit
+</button>
+
+(If this is intentional, then use the \`*AllBy*\` variant of the query (like \`queryAllByText\`, \`getAllByText\`, or \`findAllByText\`)).
+
+<div>
+  <button>
+    Submit
+  </button>
+  <button>
+    Submit
+  </button>
+  <button>
+    Submit
+  </button>
+</div>"
+`)
+})
+
+test('matching elements in error for multiple found', () => {
+  const {getByRole} = render(
+    `<button>Increment value</button
+      ><button>Different label</button
+      ><p>Wrong role</p
+      ><button>Reset value</button
+    >`,
+  )
+
+  expect(() => getByRole('button', {name: /value/i}))
+    .toThrowErrorMatchingInlineSnapshot(`
+"Found multiple elements with the role "button" and name \`/value/i\`
+
+Here are the matching elements:
+
+<button>
+  Increment value
+</button>
+
+<button>
+  Reset value
+</button>
+
+(If this is intentional, then use the \`*AllBy*\` variant of the query (like \`queryAllByText\`, \`getAllByText\`, or \`findAllByText\`)).
+
+<div>
+  <button>
+    Increment value
+  </button>
+  <button>
+    Different label
+  </button>
+  <p>
+    Wrong role
+  </p>
+  <button>
+    Reset value
+  </button>
+</div>"
+`)
+})
+
 describe('configuration', () => {
   let originalConfig
   beforeEach(() => {
@@ -393,5 +521,25 @@ describe('configuration', () => {
 
     const {getByRole} = render('<div hidden><ul  /></div>')
     expect(getByRole('list')).not.toBeNull()
+  })
+
+  test('can be configured to consider ::before and ::after for accessible names which logs errors in jsdom', () => {
+    try {
+      jest.spyOn(console, 'error').mockImplementation(() => {})
+      configure({computedStyleSupportsPseudoElements: true})
+      const {queryByRole} = render('<button>Hello, Dave!</button>')
+
+      queryByRole('button', {name: 'Hello, Dave!'})
+
+      expect(console.error).toHaveBeenCalledTimes(2)
+      expect(console.error.mock.calls[0][0]).toMatch(
+        'Error: Not implemented: window.computedStyle(elt, pseudoElt)',
+      )
+      expect(console.error.mock.calls[1][0]).toMatch(
+        'Error: Not implemented: window.computedStyle(elt, pseudoElt)',
+      )
+    } finally {
+      jest.restoreAllMocks()
+    }
   })
 })

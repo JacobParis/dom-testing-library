@@ -168,6 +168,20 @@ test('can get form controls by label text', () => {
         <label id="fifth-label-two">5th two</label>
         <input aria-labelledby="fifth-label-one fifth-label-two" id="fifth-id" />
       </div>
+      <div>
+        <input id="sixth-label-one" value="6th one"/>
+        <input id="sixth-label-two" value="6th two"/>
+        <label id="sixth-label-three">6th three</label>
+        <input aria-labelledby="sixth-label-one sixth-label-two sixth-label-three" id="sixth-id" />
+      </div>
+      <div>
+        <span id="seventh-label-one">7th one</span>
+        <input aria-labelledby="seventh-label-one" id="seventh-id" />
+      </div>
+      <div>
+        <label id="eighth.label">8th one</label>
+        <input aria-labelledby="eighth.label" id="eighth.id" />
+      </div>
     </div>
   `)
   expect(getByLabelText('1st').id).toBe('first-id')
@@ -176,6 +190,12 @@ test('can get form controls by label text', () => {
   expect(getByLabelText('4th').id).toBe('fourth.id')
   expect(getByLabelText('5th one').id).toBe('fifth-id')
   expect(getByLabelText('5th two').id).toBe('fifth-id')
+  expect(getByLabelText('6th one').id).toBe('sixth-id')
+  expect(getByLabelText('6th two').id).toBe('sixth-id')
+  expect(getByLabelText('6th one 6th two').id).toBe('sixth-id')
+  expect(getByLabelText('6th one 6th two 6th three').id).toBe('sixth-id')
+  expect(getByLabelText('7th one').id).toBe('seventh-id')
+  expect(getByLabelText('8th one').id).toBe('eighth.id')
 })
 
 test('can get elements labelled with aria-labelledby attribute', () => {
@@ -332,6 +352,171 @@ test('label with no form control', () => {
 `)
 })
 
+test('label with "for" attribute but no form control and fuzzy matcher', () => {
+  const {getByLabelText, queryByLabelText} = render(
+    `<label for="foo">All alone label</label>`,
+  )
+  expect(queryByLabelText('alone', {exact: false})).toBeNull()
+  expect(() => getByLabelText('alone', {exact: false}))
+    .toThrowErrorMatchingInlineSnapshot(`
+"Found a label with the text of: alone, however no form control was found associated to that label. Make sure you're using the "for" attribute or "aria-labelledby" attribute correctly.
+
+<div>
+  <label
+    for="foo"
+  >
+    All alone label
+  </label>
+</div>"
+`)
+})
+
+test('label with children with no form control', () => {
+  const {getByLabelText, queryByLabelText} = render(`
+  <label>
+    All alone but with children
+    <textarea>Hello</textarea>
+    <select><option value="0">zero</option></select>
+  </label>`)
+  expect(queryByLabelText(/alone/, {selector: 'input'})).toBeNull()
+  expect(() => getByLabelText(/alone/, {selector: 'input'}))
+    .toThrowErrorMatchingInlineSnapshot(`
+"Found a label with the text of: /alone/, however no form control was found associated to that label. Make sure you're using the "for" attribute or "aria-labelledby" attribute correctly.
+
+<div>
+  
+  
+  <label>
+    
+    All alone but with children
+    
+    <textarea>
+      Hello
+    </textarea>
+    
+    
+    <select>
+      <option
+        value="0"
+      >
+        zero
+      </option>
+    </select>
+    
+  
+  </label>
+</div>"
+`)
+})
+
+test('label with non-labellable element', () => {
+  const {getByLabelText, queryByLabelText} = render(`
+  <div>
+    <label for="div1">Label 1</label>
+    <div id="div1">
+      Hello
+    </div>
+  </div>
+  `)
+
+  expect(queryByLabelText(/Label/)).toBeNull()
+  expect(() => getByLabelText(/Label/)).toThrowErrorMatchingInlineSnapshot(`
+"Found a label with the text of: /Label/, however the element associated with this label (<div />) is non-labellable [https://html.spec.whatwg.org/multipage/forms.html#category-label]. If you really need to label a <div />, you can use aria-label or aria-labelledby instead.
+
+<div>
+  
+  
+  <div>
+    
+    
+    <label
+      for="div1"
+    >
+      Label 1
+    </label>
+    
+    
+    <div
+      id="div1"
+    >
+      
+      Hello
+    
+    </div>
+    
+  
+  </div>
+  
+  
+</div>"
+`)
+})
+
+test('multiple labels with non-labellable elements', () => {
+  const {getAllByLabelText, queryAllByLabelText} = render(`
+  <div>
+    <label for="span1">Label 1</label>
+    <span id="span1">
+      Hello
+    </span>
+    <label for="p1">Label 2</label>
+    <p id="p1">
+      World
+    </p>
+  </div>
+  `)
+
+  expect(queryAllByLabelText(/Label/)).toEqual([])
+  expect(() => getAllByLabelText(/Label/)).toThrowErrorMatchingInlineSnapshot(`
+"Found a label with the text of: /Label/, however the element associated with this label (<span />) is non-labellable [https://html.spec.whatwg.org/multipage/forms.html#category-label]. If you really need to label a <span />, you can use aria-label or aria-labelledby instead.
+
+Found a label with the text of: /Label/, however the element associated with this label (<p />) is non-labellable [https://html.spec.whatwg.org/multipage/forms.html#category-label]. If you really need to label a <p />, you can use aria-label or aria-labelledby instead.
+
+<div>
+  
+  
+  <div>
+    
+    
+    <label
+      for="span1"
+    >
+      Label 1
+    </label>
+    
+    
+    <span
+      id="span1"
+    >
+      
+      Hello
+    
+    </span>
+    
+    
+    <label
+      for="p1"
+    >
+      Label 2
+    </label>
+    
+    
+    <p
+      id="p1"
+    >
+      
+      World
+    
+    </p>
+    
+  
+  </div>
+  
+  
+</div>"
+`)
+})
+
 test('totally empty label', () => {
   const {getByLabelText, queryByLabelText} = render(`<label />`)
   expect(queryByLabelText('')).toBeNull()
@@ -366,12 +551,14 @@ test('query/get element by its title', () => {
         <span title="Ignore this" id="1"/>
         <span title="Delete" id="2"/>
         <span title="Ignore this as well" id="3"/>
+        <div title="WrongTitle" id="4">HelloWorld</div>
     </div>
   `)
 
   expect(getByTitle('Delete').id).toEqual('2')
   expect(queryByTitle('Delete').id).toEqual('2')
   expect(queryByTitle('Del', {exact: false}).id).toEqual('2')
+  expect(queryByTitle("HelloWorld")).toBeNull()
 })
 
 test('query/get title element of SVG', () => {
@@ -946,4 +1133,70 @@ test('can get a select with options', () => {
     </label>
   `)
   getByLabelText('Label')
+})
+
+test('can get an element with aria-labelledby when label has a child', () => {
+  const {getByLabelText} = render(`
+    <div>
+      <label id='label-with-textarea'>
+        First Label
+        <textarea>Value</textarea>
+      </label>
+      <input aria-labelledby='label-with-textarea' id='1st-input'/>
+      <label id='label-with-select'>
+        Second Label
+        <select><option value="1">one</option></select>
+      </label>
+      <input aria-labelledby='label-with-select' id='2nd-input'/>
+    </div>
+  `)
+  expect(getByLabelText('First Label', {selector: 'input'}).id).toBe(
+    '1st-input',
+  )
+  expect(getByLabelText('Second Label', {selector: 'input'}).id).toBe(
+    '2nd-input',
+  )
+})
+test('gets an element when there is an aria-labelledby a not found id', () => {
+  const {getByLabelText} = render(`
+    <div>
+      <input aria-labelledby="not-existing-label"/>
+      <label id="existing-label">Test</label>
+      <input aria-labelledby="existing-label" id="input-id" />
+    </div>
+  `)
+  expect(getByLabelText('Test').id).toBe('input-id')
+})
+
+test('return a proper error message when no label is found and there is an aria-labelledby a not found id', () => {
+  const {getByLabelText} = render(
+    '<input aria-labelledby="not-existing-label"/>',
+  )
+
+  expect(() => getByLabelText('LucyRicardo'))
+    .toThrowErrorMatchingInlineSnapshot(`
+"Unable to find a label with the text of: LucyRicardo
+
+<div>
+  <input
+    aria-labelledby="not-existing-label"
+  />
+</div>"
+`)
+})
+
+// https://github.com/testing-library/dom-testing-library/issues/723
+it('gets form controls by label text on IE and other legacy browsers', () => {
+  // Simulate lack of support for HTMLInputElement.prototype.labels
+  jest
+    .spyOn(HTMLInputElement.prototype, 'labels', 'get')
+    .mockReturnValue(undefined)
+
+  const {getByLabelText} = renderIntoDocument(`
+    <label>
+      Label text
+      <input id="input-id" />
+    </label>
+  `)
+  expect(getByLabelText('Label text').id).toBe('input-id')
 })

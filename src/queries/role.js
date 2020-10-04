@@ -2,6 +2,9 @@ import {computeAccessibleName} from 'dom-accessibility-api'
 import {roles as allRoles} from 'aria-query'
 import {
   computeAriaSelected,
+  computeAriaChecked,
+  computeAriaPressed,
+  computeHeadingLevel,
   getImplicitAriaRoles,
   prettyRoles,
   isInaccessible,
@@ -29,6 +32,9 @@ function queryAllByRole(
     normalizer,
     queryFallbacks = false,
     selected,
+    checked,
+    pressed,
+    level,
   } = {},
 ) {
   checkContainerType(container)
@@ -39,6 +45,27 @@ function queryAllByRole(
     // guard against unknown roles
     if (allRoles.get(role)?.props['aria-selected'] === undefined) {
       throw new Error(`"aria-selected" is not supported on role "${role}".`)
+    }
+  }
+
+  if (checked !== undefined) {
+    // guard against unknown roles
+    if (allRoles.get(role)?.props['aria-checked'] === undefined) {
+      throw new Error(`"aria-checked" is not supported on role "${role}".`)
+    }
+  }
+
+  if (pressed !== undefined) {
+    // guard against unknown roles
+    if (allRoles.get(role)?.props['aria-pressed'] === undefined) {
+      throw new Error(`"aria-pressed" is not supported on role "${role}".`)
+    }
+  }
+
+  if (level !== undefined) {
+    // guard against using `level` option with any role other than `heading`
+    if (role !== 'heading') {
+      throw new Error(`Role "${role}" cannot have "level" property.`)
     }
   }
 
@@ -82,6 +109,15 @@ function queryAllByRole(
       if (selected !== undefined) {
         return selected === computeAriaSelected(element)
       }
+      if (checked !== undefined) {
+        return checked === computeAriaChecked(element)
+      }
+      if (pressed !== undefined) {
+        return pressed === computeAriaPressed(element)
+      }
+      if (level !== undefined) {
+        return level === computeHeadingLevel(element)
+      }
       // don't care if aria attributes are unspecified
       return true
     })
@@ -99,7 +135,10 @@ function queryAllByRole(
       }
 
       return matches(
-        computeAccessibleName(element),
+        computeAccessibleName(element, {
+          computedStyleSupportsPseudoElements: getConfig()
+            .computedStyleSupportsPseudoElements,
+        }),
         element,
         name,
         text => text,
@@ -107,8 +146,18 @@ function queryAllByRole(
     })
 }
 
-const getMultipleError = (c, role) =>
-  `Found multiple elements with the role "${role}"`
+const getMultipleError = (c, role, {name} = {}) => {
+  let nameHint = ''
+  if (name === undefined) {
+    nameHint = ''
+  } else if (typeof name === 'string') {
+    nameHint = ` and name "${name}"`
+  } else {
+    nameHint = ` and name \`${name}\``
+  }
+
+  return `Found multiple elements with the role "${role}"${nameHint}`
+}
 
 const getMissingError = (
   container,
